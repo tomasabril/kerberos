@@ -1,7 +1,11 @@
 # kerberos
 Kerberos implementation in python
 
-Para a materia de Segurança e auditoria de Sistemas
+What is Kerberos?
+
+Kerberos is a network authentication protocol. It is designed to provide strong authentication for client/server applications by using secret-key cryptography.
+
+Para a materia de Segurança e Auditoria de Sistemas
 
 Prof. Mauro Fonseca
 
