@@ -4,55 +4,63 @@
 @author: Tomás Abril
 """
 
-    
+
 import time
 import socket
 
 class As():
 
-    def __init__(self):
+    def __init__(self, host='localhost', port=50001):
         # Cria o nome do host
-        self.meuHost = 'localhost'
-         
+        self.meuHost = host
+
         # Utiliza este número de porto
-        self.minhaPort = 50007
-         
+        self.minhaPort = port
+
         # Cria um objeto socket. As duas constantes referem-se a:
         # Familia do endereço (padrão é socket.AF_INET)
-        # Se é stream (socket.SOCK_STREAM, o padrão) ou datagram (socket.SOCK_DGRAM)
+        # Se é stream (socket.SOCK_STREAM, o padrão)
+        # ou datagram (socket.SOCK_DGRAM)
         # E o protocolo (padrão é 0)
         # Da maneira como configuramos:
         # AF_INIT == Protocolo de endereço de IP
         # SOCK_STREAM == Protocolo de transferência TCP
         # Combinação = Server TCP/IP
-        sockobj = socket(AF_INET, SOCK_STREAM)
-         
+        self.sockobj = socket.socket()
+        self.sockobj.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+
         # Vincula o servidor ao número de porto
-        sockobj.bind((meuHost, minhaPort))
-         
-        # O socket começa a esperar por clientes limitando a 
+        self.sockobj.bind((self.meuHost, self.minhaPort))
+
+    def listenFor(self, qte=5):
+        # O socket começa a esperar por clientes limitando a
         # 5 conexões por vez
-        sockobj.listen(5)
-         
-         
+        self.sockobj.listen(qte)
+
         while True:
             # Aceita uma conexão quando encontrada e devolve a
             # um novo socket conexão e o endereço do cliente
             # conectado
-            conexão, endereço = sockobj.accept()
-            print('Server conectado por', endereço)
-             
+            c_socket, addr = self.sockobj.accept()
+            print('Server conectado por', addr)
+
             while True:
                 # Recebe data enviada pelo cliente
-                data = conexão.recv(1024)
-                # time.sleep(3)
-                 
+                # até 1024 bytes
+                data = c_socket.recv(1024)
+
                 # Se não receber nada paramos o loop
-                if not data: break
-         
+                if not data:
+                    break
+
                 # O servidor manda de volta uma resposta
-                conexão.send(b'Eco=>' + data)
-             
+                c_socket.send(data)
+
             # Fecha a conexão criada depois de responder o
             # cliente
-            conexão.close()
+            c_socket.close()
+
+if __name__ == "__main__":
+    auth_server = As()
+    auth_server.listenFor()
+
