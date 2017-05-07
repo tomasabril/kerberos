@@ -19,7 +19,6 @@ tam = 3
 
 class Service1():
 
-
     # para o AES
     backend = default_backend()
     key = os.urandom(32)
@@ -32,7 +31,7 @@ class Service1():
 
     def __init__(self, host='localhost', port=50003):
         self.k_s = hashlib.sha512(b'123').hexdigest()
-
+        self.my_id = 1
 
         self.meuHost = host
         self.minhaPort = port
@@ -44,7 +43,6 @@ class Service1():
         # Vincula o servidor ao número de port
         self.sockobj.bind((self.meuHost, self.minhaPort))
         print('Service 1 started at {} port {}'.format(host, port))
-
 
     def listenFor(self, qte=5):
         # O socket começa a esperar por clientes limitando a
@@ -79,7 +77,6 @@ class Service1():
             # Fecha a conexão criada depois de responder o cliente
             c_socket.close()
 
-
     def generatem6(self, n3):
         resp = 'pode usar que deu tudo certo'
         parte1 = '{}:{}'.format(resp, n3)
@@ -91,14 +88,3 @@ if __name__ == "__main__":
 
     s1 = Service1()
     s1.listenFor()
-
-
-
-
-
-
-
-
-
-
-

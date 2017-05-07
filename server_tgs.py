@@ -40,7 +40,6 @@ class Tgs():
 
         # carregando dicionario do arquivo
         with shelve.open(self.db_file) as db:
-#            db.clear()
             self.service_db = db['0']
         print('my registered services')
         s_list = list(self.service_db.keys())
@@ -131,15 +130,4 @@ class Tgs():
 if __name__ == "__main__":
 
     tgs = Tgs()
-    tgs.listenFor()
-
-
-
-
-
-
-
-
-
-
-
+    tgs.listenFor()s

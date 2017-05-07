@@ -94,4 +94,3 @@ if __name__ == "__main__":
     clt.auth_with_as(id_s=1)
     clt.get_ticket()
     clt.use_service()
-

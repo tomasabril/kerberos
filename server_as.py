@@ -40,7 +40,6 @@ class As():
 
         # carregando dicionario do arquivo
         with shelve.open(self.db_file) as db:
-#            db.clear()
             self.user_db = db['0']
         print('my registered users')
         u_list = list(self.user_db.keys())
@@ -125,23 +124,3 @@ if __name__ == "__main__":
 
     auth_server = As()
     auth_server.listenFor()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
