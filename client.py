@@ -11,6 +11,7 @@ import hashlib
 # random data size
 tam = 3
 
+
 class Client():
 
     m1 = ''
@@ -24,7 +25,7 @@ class Client():
         self.id_c = 1
         self.kc = hashlib.sha512(input("Minha senha: ").encode()).hexdigest()
 
-    def connectto(self, port=50001, host='localhost'):
+    def connectto(self, port=50000, host='localhost'):
         # Criamos o socket e o conectamos ao servidor
         self.sockobj = socket.socket()
         self.sockobj.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -71,7 +72,26 @@ class Client():
         print('m3= {}'.format(self.m3))
         print('m4= {}'.format(self.m4))
 
+    def use_service(self):
+        msg1 = self.m1.split(':')
+        msg2 = self.m2.split(':')
+        msg3 = self.m3.split(':')
+        msg4 = self.m4.split(':')
+        t_r = msg1[2]
+        id_s = msg1[1]
+        n3 = int.from_bytes(os.urandom(tam), byteorder="big")
+        parte1 = '{}:{}:{}:{}'.format(self.id_c, t_r, id_s, n3)
+        parte2 = '{}:{}:{}'.format(msg4[2], msg4[3], msg4[4])
+        self.m5 = '{}:{}'.format(parte1, parte2)
+        self.connectto(port=50003)
+        self.m6 = self.send_msg(self.m5)
+        self.close_conection()
+        print('m5= {}'.format(self.m5))
+        print('m6= {}'.format(self.m6))
+
 if __name__ == "__main__":
     clt = Client()
     clt.auth_with_as(id_s=1)
     clt.get_ticket()
+    clt.use_service()
+
