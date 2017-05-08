@@ -20,8 +20,9 @@ cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
 encryptor = cipher.encryptor()
 
 
-msg = 'coisas muito secretas aqui:::123alo'
+msg = 'coisas muito secretas aqui:::123aloycfturdxryewsztewzewza'
 msgb = msg.encode()
+msgb = b'1:60:14460114'
 
 # padding
 padder = padding.PKCS7(128).padder()

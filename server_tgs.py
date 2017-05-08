@@ -115,7 +115,7 @@ class Tgs():
         return m4
 
     def create_service(self):
-        while input('create new service?'):
+        while input('create new service? '):
             u_id = input('New service ID: ')
             senha = hashlib.sha512(input("Senha: ").encode()).hexdigest()
             maxtime = input('Tempo maximo a ser permitido: ')
@@ -130,4 +130,4 @@ class Tgs():
 if __name__ == "__main__":
 
     tgs = Tgs()
-    tgs.listenFor()s
+    tgs.listenFor()

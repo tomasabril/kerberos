@@ -5,13 +5,10 @@
 """
 
 import os
-import time
 import socket
-import pickle
 import shelve
 import hashlib
-from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-from cryptography.hazmat.backends import default_backend
+import my_aes
 
 # random data size
 tam = 3
@@ -25,18 +22,8 @@ class As():
     # id: hash_senha
     user_db = {}
 
-    # para o AES
-    backend = default_backend()
-    key = os.urandom(32)
-    iv = os.urandom(16)
-    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=backend)
-    encryptor = cipher.encryptor()
-#    ct = encryptor.update(b"a secret message") + encryptor.finalize()
-#    decryptor = cipher.decryptor()
-#    decryptor.update(ct) + decryptor.finalize()
-
     def __init__(self, host='localhost', port=50001):
-        self.k_tgs = hashlib.sha512(b'chave do tgs').hexdigest()
+        self.k_tgs = hashlib.sha512(b'chave do tgs').hexdigest()[:32]
 
         # carregando dicionario do arquivo
         with shelve.open(self.db_file) as db:
@@ -80,14 +67,25 @@ class As():
                     break
 
                 # O servidor manda de volta uma resposta
-                data_str = data.decode()
-#                print('recebi {}'.format(data_str))
-                recebido = data_str.split(':')
-                user_id = recebido[0]
-                t_r = recebido[2]
-                n1 = recebido[3]
+#                print('recebi: \n{}'.format(data))
+
+                data_split = data.split(b'::-+-::')
+                user_id_b = data_split[0]
+                crip_bin = data_split[1]
+                user_id = user_id_b.decode()
+
+#                print('user_id={}'.format(user_id))
+
+#                print('parte criptografada:{}'.format(crip_bin))
+
                 if self.user_in_db(str(user_id)):
-                    m2 = self.generatem2(user_id, t_r, n1).encode()
+                    # descriptografando
+                    m1_dcrypt = my_aes.decrypt(crip_bin, self.user_db[user_id])
+                    m1_dcrypt_split = m1_dcrypt.split(':')
+                    t_r = m1_dcrypt_split[1]
+                    n1 = m1_dcrypt_split[2]
+
+                    m2 = self.generatem2(user_id, t_r, n1)
                     c_socket.send(m2)
                 else:
                     c_socket.send(b'Usuario nao encontrado.')
@@ -105,13 +103,19 @@ class As():
     def generatem2(self, id_c, t_r, n1):
         k_c_tgs = int.from_bytes(os.urandom(tam), byteorder="big")
         t_c_tgs = '{}:{}:{}'.format(id_c, t_r, k_c_tgs)
-        m2 = '{}:{}:{}'.format(k_c_tgs, n1, t_c_tgs)
+        t_c_tgs_crypt = my_aes.crypt(t_c_tgs, self.k_tgs)
+
+        parte1 = '{}:{}'.format(k_c_tgs, n1)
+        parte1_crypt = my_aes.crypt(parte1, self.user_db[id_c])
+
+        m2 = parte1_crypt + b'::-+-::' + t_c_tgs_crypt
+#        print('id_c={}\nt_r={}\nn1={}'.format(id_c, t_r, n1))
         return m2
 
     def create_user(self):
-        while input('create new user?'):
+        while input('create new user? '):
             u_id = input('New user ID: ')
-            senha = hashlib.sha512(input("senha: ").encode()).hexdigest()
+            senha = hashlib.sha512(input("senha: ").encode()).hexdigest()[:32]
             if not self.user_in_db(u_id):
                 self.user_db[u_id] = senha
             else:

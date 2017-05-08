@@ -7,6 +7,7 @@
 import socket
 import os
 import hashlib
+import my_aes
 
 # random data size
 tam = 3
@@ -23,7 +24,7 @@ class Client():
 
     def __init__(self):
         self.id_c = 1
-        self.kc = hashlib.sha512(input("Minha senha: ").encode()).hexdigest()
+        self.kc = hashlib.sha512(input("Minha senha: ").encode()).hexdigest()[:32]
 
     def connectto(self, port=50000, host='localhost'):
         # Criamos o socket e o conectamos ao servidor
@@ -33,12 +34,12 @@ class Client():
 
     def send_msg(self, msg):
         # Menssagem a ser mandada condificada em bytes
-        self.sockobj.send(msg.encode())
+        self.sockobj.send(msg)
 
         data = self.sockobj.recv(1024)
-        resposta = data.decode()
+#        resposta = data.decode()
 
-        return resposta
+        return data
 
     def close_conection(self):
         # Fechamos a conexão
@@ -46,7 +47,15 @@ class Client():
 
     def auth_with_as(self, id_s=1, t_r=60):
         n1 = int.from_bytes(os.urandom(tam), byteorder="big")
-        self.m1 = "{}:{}:{}:{}".format(self.id_c, id_s, t_r, n1)
+        parte1 = '{}::-+-::'.format(self.id_c)
+        parte2 = '{}:{}:{}'.format(id_s, t_r, n1)
+        p2crypt = my_aes.crypt(parte2, self.kc)
+
+        self.m1 = parte1.encode() + p2crypt
+#        print('\n antes de mandar:')
+#        print('parte criptografada {}'.format(p2crypt))
+#        print('mensagem total'.format(self.m1))
+#        print('id_c={}\nid_s={}\nt_r={}\nn1={}'.format(self.id_c, id_s, t_r, n1))
 
         self.connectto(port=50001)
         self.m2 = self.send_msg(self.m1)
@@ -92,5 +101,5 @@ class Client():
 if __name__ == "__main__":
     clt = Client()
     clt.auth_with_as(id_s=1)
-    clt.get_ticket()
-    clt.use_service()
+    #clt.get_ticket()
+    #clt.use_service()
