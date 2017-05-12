@@ -1,0 +1,11 @@
+# limpa banco de dados
+recreate_dbs.py
+
+# abre servidores, cada um em um terminal
+# registrando usuarios e serviços quando necessário
+server_as.py
+server_tgs.py
+service1.py
+
+# executa o cliente
+client.py

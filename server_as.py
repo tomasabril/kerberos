@@ -66,17 +66,10 @@ class As():
                 if not data:
                     break
 
-                # O servidor manda de volta uma resposta
-#                print('recebi: \n{}'.format(data))
-
                 data_split = data.split(b'::-+-::')
                 user_id_b = data_split[0]
                 crip_bin = data_split[1]
                 user_id = user_id_b.decode()
-
-#                print('user_id={}'.format(user_id))
-
-#                print('parte criptografada:{}'.format(crip_bin))
 
                 if self.user_in_db(str(user_id)):
                     # descriptografando
@@ -88,7 +81,7 @@ class As():
                     m2 = self.generatem2(user_id, t_r, n1)
                     c_socket.send(m2)
                 else:
-                    c_socket.send(b'Usuario nao encontrado.')
+                    c_socket.send(b'Usuario nao encontrado.' + b'::-+-::' + b'.')
 
             # Fecha a conexão criada depois de responder o cliente
             c_socket.close()
@@ -101,7 +94,9 @@ class As():
             return 0
 
     def generatem2(self, id_c, t_r, n1):
-        k_c_tgs = int.from_bytes(os.urandom(tam), byteorder="big")
+        k_c_tgs = os.urandom(tam)
+        k_c_tgs = hashlib.sha512(k_c_tgs).hexdigest()[:32]
+
         t_c_tgs = '{}:{}:{}'.format(id_c, t_r, k_c_tgs)
         t_c_tgs_crypt = my_aes.crypt(t_c_tgs, self.k_tgs)
 
@@ -109,7 +104,6 @@ class As():
         parte1_crypt = my_aes.crypt(parte1, self.user_db[id_c])
 
         m2 = parte1_crypt + b'::-+-::' + t_c_tgs_crypt
-#        print('id_c={}\nt_r={}\nn1={}'.format(id_c, t_r, n1))
         return m2
 
     def create_user(self):
